@@ -14,21 +14,21 @@ import org.http4s.server.blaze.BlazeServerBuilder
 
 class MainModule {
 
-  def start[F[_]: ContextShift: ConcurrentEffect: Timer](): F[Unit] = {
+  def start()(implicit concurrentEffect: ConcurrentEffect[IO], timer: Timer[IO]): IO[Unit] = {
     for {
-      config <- Config.loadSync[F]
+      config <- Config.loadSync
       transactorResource = DatabaseModule.createTransactor(config.database)
       _ <- transactorResource.use(transactor => program(config, transactor))
     } yield ()
   }
 
-  def program[F[_]: ConcurrentEffect: Timer](appConfig: AppConfig, transactor: Transactor[F]): F[Unit] = {
+  def program(appConfig: AppConfig, transactor: Transactor[IO])(implicit ce: ConcurrentEffect[IO], timer: Timer[IO]): IO[Unit] = {
     for {
-      dietModule <- DietModule.createSync[F](transactor)
-      trainingModule <- TrainingModule.createSync[F](transactor)
-      scheduleModule <- ScheduleModule.createSync[F](transactor, dietModule.dietRepository, trainingModule.trainingRepository)
-      api = new HttpApi[F](dietModule.dietController, trainingModule.trainingController, scheduleModule.scheduleController)
-      _ <- BlazeServerBuilder[F].bindHttp(appConfig.http.port, appConfig.http.host).withHttpApp(api.httpApp).serve.compile.drain
+      dietModule <- DietModule.createSync(transactor)
+      trainingModule <- TrainingModule.createSync(transactor)
+      scheduleModule <- ScheduleModule.createSync(transactor, dietModule.dietRepository, trainingModule.trainingRepository)
+      api = new HttpApi(dietModule.dietController, trainingModule.trainingController, scheduleModule.scheduleController)
+      _ <- BlazeServerBuilder[IO].bindHttp(appConfig.http.port, appConfig.http.host).withHttpApp(api.httpApp).serve.compile.drain
     } yield ()
   }
 }

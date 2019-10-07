@@ -1,8 +1,9 @@
 package com.softwaremill.cats.training.application
 
+import cats.effect.IO
 import com.softwaremill.cats.training.domain.Training
 
-class TrainingService[F[_]](trainingRepository: TrainingRepository[F]) {
+class TrainingService(trainingRepository: TrainingRepository) {
 
-  def getTrainings(): F[List[Training]] = trainingRepository.getTrainings()
+  def getTrainings(): IO[List[Training]] = trainingRepository.getTrainings()
 }

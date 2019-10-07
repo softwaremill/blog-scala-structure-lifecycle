@@ -1,8 +1,9 @@
 package com.softwaremill.cats.diet.application
 
+import cats.effect.IO
 import com.softwaremill.cats.diet.domain.Diet
 
-class DietService[F[_]](dietRepository: DietRepository[F]) {
+class DietService(dietRepository: DietRepository) {
 
-  def getDiets(): F[List[Diet]] = dietRepository.getDiets()
+  def getDiets(): IO[List[Diet]] = dietRepository.getDiets()
 }

@@ -12,16 +12,16 @@ import org.http4s.server.blaze.BlazeServerBuilder
 
 class MainModule {
 
-  def start[F[_]: ContextShift: ConcurrentEffect: Timer](): Stream[F, Unit] = {
+  def start()(implicit concurrentEffect: ConcurrentEffect[IO], timer: Timer[IO], contextShift: ContextShift[IO]): Stream[IO, Unit] = {
     for {
-      config <- Config.load[F]
+      config <- Config.load
       transactorResource = DatabaseModule.createTransactor(config.database)
       transactor <- Stream.resource(transactorResource)
-      dietModule <- DietModule.create[F](transactor)
-      trainingModule <- TrainingModule.create[F](transactor)
-      scheduleModule <- ScheduleModule.create[F](transactor, dietModule.dietRepository, trainingModule.trainingRepository)
-      api = new HttpApi[F](dietModule.dietController, trainingModule.trainingController, scheduleModule.scheduleController)
-      _ <- BlazeServerBuilder[F].bindHttp(config.http.port, config.http.host).withHttpApp(api.httpApp).serve
+      dietModule <- DietModule.create(transactor)
+      trainingModule <- TrainingModule.create(transactor)
+      scheduleModule <- ScheduleModule.create(transactor, dietModule.dietRepository, trainingModule.trainingRepository)
+      api = new HttpApi(dietModule.dietController, trainingModule.trainingController, scheduleModule.scheduleController)
+      _ <- BlazeServerBuilder[IO].bindHttp(config.http.port, config.http.host).withHttpApp(api.httpApp).serve
     } yield ()
   }
 }

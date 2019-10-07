@@ -1,6 +1,6 @@
 package com.softwaremill.cats.config
 
-import cats.effect.Sync
+import cats.effect.IO
 import pureconfig.ConfigSource
 import pureconfig.generic.auto._
 
@@ -14,6 +14,6 @@ object Config {
       database: DatabaseConfig
   )
 
-  def loadSync[F[_]: Sync]: F[AppConfig] =
-    Sync[F].delay(ConfigSource.default.at("app").loadOrThrow[AppConfig])
+  def loadSync: IO[AppConfig] =
+    IO.delay(ConfigSource.default.at("app").loadOrThrow[AppConfig])
 }

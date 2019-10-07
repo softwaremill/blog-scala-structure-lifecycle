@@ -6,9 +6,9 @@ import com.softwaremill.cats.diet.application.DietService
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
 
-class DietController[F[_]: Sync](dietService: DietService[F]) extends Http4sDsl[F] {
+class DietController(dietService: DietService) extends Http4sDsl[IO] {
 
-  val routes: HttpRoutes[F] = HttpRoutes.of[F] {
+  val routes: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case GET -> Root / "diet" =>
       dietService.getDiets().flatMap(diets => Ok("TODO json converters"))
   }

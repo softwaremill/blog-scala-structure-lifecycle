@@ -6,9 +6,9 @@ import com.softwaremill.fs2.training.application.TrainingService
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
 
-class TrainingController[F[_]: Sync](trainingService: TrainingService[F]) extends Http4sDsl[F] {
+class TrainingController(trainingService: TrainingService) extends Http4sDsl[IO] {
 
-  val routes: HttpRoutes[F] = HttpRoutes.of[F] {
+  val routes: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case GET -> Root / "training" =>
       trainingService.getTrainings() *> Ok("TODO json converters")
   }

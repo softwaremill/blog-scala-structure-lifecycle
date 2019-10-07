@@ -1,6 +1,6 @@
 package com.softwaremill.fs2.config
 
-import cats.effect.Sync
+import cats.effect.IO
 import pureconfig.generic.auto._
 import fs2.Stream
 import pureconfig.ConfigSource
@@ -15,8 +15,8 @@ object Config {
       database: DatabaseConfig
   )
 
-  def loadSync[F[_]: Sync]: F[AppConfig] =
-    Sync[F].delay(ConfigSource.default.at("app").loadOrThrow[AppConfig])
+  def loadSync: IO[AppConfig] =
+    IO.delay(ConfigSource.default.at("app").loadOrThrow[AppConfig])
 
-  def load[F[_]: Sync]: Stream[F, AppConfig] = Stream.eval(loadSync)
+  def load: Stream[IO, AppConfig] = Stream.eval(loadSync)
 }
